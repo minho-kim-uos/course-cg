@@ -4,8 +4,6 @@ function main()
 {
     const loc_aPosition = 7;
 
-    // shader code strings are specified using "backticks"
-    // which allow (i) multi-lines and (ii) expression embedding.
     const src_vert = 
     `#version 300 es
         layout(location=${loc_aPosition}) in vec4 aPosition;
@@ -24,26 +22,19 @@ function main()
         }
     `;
 
-
     // Getting the WebGL2 context
     const canvas = document.querySelector('#webgl2');
     const gl = canvas.getContext("webgl2");
 
-    // Compiling & linking the shaders
-    // For simplicity, no error checking is done.
-    const h_prog = gl.createProgram();
+    let h_prog;
 
-    const h_vert = gl.createShader(gl.VERTEX_SHADER);
-    gl.shaderSource(h_vert, src_vert);
-    gl.compileShader(h_vert);
-    gl.attachShader(h_prog, h_vert);
-
-    const h_frag = gl.createShader(gl.FRAGMENT_SHADER);
-    gl.shaderSource(h_frag, src_frag);
-    gl.compileShader(h_frag);
-    gl.attachShader(h_prog, h_frag);
-
-    gl.linkProgram(h_prog);
+    try {
+        h_prog = build_shader(gl, src_vert, src_frag);
+    }
+    catch(e) {
+        console.log(e.message);
+        return;
+    }
 
     const vertices = new Float32Array([
                          0.0,  0.9,
@@ -84,6 +75,53 @@ function main()
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     gl.bindVertexArray(null);
 
+}
+
+function build_shader(gl, src_vert, src_frag) {
+
+    function compile_shader(gl, type, src) {
+        const h_shader = gl.createShader(type);
+        const type_str = type==gl.VERTEX_SHADER?"vertex":"fragment";
+        if (!h_shader) {
+            throw new Error(`Failed to create a ${type_str} shader`);
+        }
+        gl.shaderSource(h_shader, src);
+        gl.compileShader(h_shader);
+        let status = gl.getShaderParameter(h_shader, gl.COMPILE_STATUS);
+        if (!status) {
+            let error = gl.getShaderInfoLog(h_shader);
+            gl.deleteShader(h_shader);
+            throw new Error(`Failed to compile the ${type_str} shader: ${error}`);
+        }
+        return h_shader;
+    }
+    
+    let h_prog, h_vert, h_frag;
+
+    try {
+        h_vert = compile_shader(gl, gl.VERTEX_SHADER, src_vert);
+        h_frag = compile_shader(gl, gl.FRAGMENT_SHADER, src_frag);
+    
+        h_prog = gl.createProgram();
+        if(!h_prog) throw new Error(`Failed to create a shader program`); 
+        gl.attachShader(h_prog, h_vert);
+        gl.attachShader(h_prog, h_frag);
+    
+        gl.linkProgram(h_prog);
+
+        let status = gl.getProgramParameter(h_prog, gl.LINK_STATUS);
+        if (!status) {
+            let error = gl.getProgramInfoLog(h_prog);
+            throw new Error(`Failed to link the program: ${error}`);
+        }
+        return h_prog;
+    }
+    catch(e) {
+        gl.deleteProgram(h_prog);
+        gl.deleteShader(h_vert);
+        gl.deleteShader(h_frag);
+        throw e;
+    }
 }
 
 

@@ -1,11 +1,11 @@
+import {build_shader_without_uniforms} from "./module_shader.js"
+
 "use stricrt";
 
 function main()
 {
     const loc_aPosition = 7;
 
-    // shader code strings are specified using "backticks"
-    // which allow (i) multi-lines and (ii) expression embedding.
     const src_vert = 
     `#version 300 es
         layout(location=${loc_aPosition}) in vec4 aPosition;
@@ -24,26 +24,19 @@ function main()
         }
     `;
 
-
     // Getting the WebGL2 context
-    const canvas = document.querySelector('#webgl2');
+    const canvas = document.getElementById('webgl2');
     const gl = canvas.getContext("webgl2");
 
-    // Compiling & linking the shaders
-    // For simplicity, no error checking is done.
-    const h_prog = gl.createProgram();
+    let h_prog;
 
-    const h_vert = gl.createShader(gl.VERTEX_SHADER);
-    gl.shaderSource(h_vert, src_vert);
-    gl.compileShader(h_vert);
-    gl.attachShader(h_prog, h_vert);
-
-    const h_frag = gl.createShader(gl.FRAGMENT_SHADER);
-    gl.shaderSource(h_frag, src_frag);
-    gl.compileShader(h_frag);
-    gl.attachShader(h_prog, h_frag);
-
-    gl.linkProgram(h_prog);
+    try {
+        h_prog = build_shader_without_uniforms(gl, src_vert, src_frag);
+    }
+    catch(e) {
+        console.log(e.message);
+        return;
+    }
 
     const vertices = new Float32Array([
                          0.0,  0.9,
@@ -85,6 +78,5 @@ function main()
     gl.bindVertexArray(null);
 
 }
-
 
 main();
