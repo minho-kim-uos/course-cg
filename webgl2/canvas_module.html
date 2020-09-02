@@ -1,0 +1,29 @@
+<html>
+    <title>WebGL2 Canvas (module)</title>
+    <script type="module">
+        function main()
+        {
+            let canvas = document.getElementById('webgl2');
+            let gl = canvas.getContext("webgl2");
+            
+            if (!gl)
+            {
+                console.log('Failed to get the rendering context for WebGL'); return;
+            }
+            else
+            {
+                gl.clearColor(1.0, 0.0, 0.0, 1.0);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+            }
+        }
+
+        main();
+    </script>
+    <body>
+        <h1 align=center>WebGL2 Canvas (module)</h1>
+        <div style="text-align:center;">
+            <canvas id="webgl2" width=512 height=512>
+            </canvas>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,29 @@
+<html>
+    <title>
+        WebGL2 Examples
+    </title>
+    <style>
+        .source {
+            text-decoration:none;
+        }
+        .source:hover {
+            color:red;
+            text-decoration:underline;
+        }
+    </style>
+    <script type="module">
+        function main() {
+            let elems = document.querySelectorAll(".source");
+            elems.forEach(e => e.innerHTML = e.innerHTML + " (<tt>" + e.pathname.slice(1) + "</tt>)");
+        }
+
+        main();
+    </script>
+    <body>
+        <h1 align=center>WebGL2 Examples</h1>
+        <ul>
+            <li><a class=source href="canvas_script.html">WebGL2 Canvas (script)</a></li>
+            <li><a class=source href="canvas_module.html">WebGL2 Canvas (module)</a></li>
+        </ul>
+    </body>
+</html>
